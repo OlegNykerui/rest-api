@@ -7,7 +7,7 @@ mongoose.set("strictQuery", false);
 
 const { MONGO_URL } = process.env;
 
-async function main() {
+const main = async () => {
   try {
     await mongoose.connect(MONGO_URL);
     console.log("Database connection successful");
@@ -15,6 +15,6 @@ async function main() {
     console.log("error while connecting to MongoDB", error.message);
     process.exit(1);
   }
-}
+};
 
 main();

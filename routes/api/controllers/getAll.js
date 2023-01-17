@@ -1,8 +1,10 @@
-const contacts = require("../../../models/contacts");
+const { Contact } = require("../../../models/schema");
 
 const getAll = async (req, res, next) => {
+  // return Contact.find({});
   try {
-    res.status(200).json(await contacts.listContacts());
+    const allContacts = await Contact.find({});
+    return res.status(200).json(allContacts);
   } catch (error) {
     next(error);
   }

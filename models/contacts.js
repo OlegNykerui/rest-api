@@ -2,11 +2,23 @@ const fs = require("fs/promises");
 const path = require("path");
 const shortid = require("shortid");
 const contactsPath = path.join(__dirname, "./contacts.json");
+// const service = require("../routes/api/controllers/getAll");
 
 const updateContactsFile = async (contacts) =>
   fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 
-const listContacts = async () => {
+const listContacts = async (req, res, next) => {
+  // try {
+  //   const contact = await service.getAll();
+  //   res.json({
+  //     status: "success",
+  //     code: 200,
+  //     data: { contact },
+  //   });
+  // } catch (err) {
+  //   console.error(err);
+  //   next(err);
+  // }
   const data = await fs.readFile(contactsPath);
   const contacts = JSON.parse(data);
   return contacts;
