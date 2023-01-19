@@ -1,6 +1,6 @@
-const contact = require("../../../models/contacts");
+const contact = require("../models/contacts");
 
-const validation = require("../../../models/validation");
+const validation = require("../models/validation");
 
 const updateById = async (req, res, next) => {
   try {
