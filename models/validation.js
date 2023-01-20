@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const schema = Joi.object({
+const joi = Joi.object({
   name: Joi.string().alphanum().min(3).max(10).required(),
 
   email: Joi.string()
@@ -8,4 +8,16 @@ const schema = Joi.object({
     .required(),
   phone: Joi.string().alphanum().min(3).max(15).required(),
 });
-module.exports = schema;
+
+const updateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+
+const schemas = {
+  joi,
+  updateFavoriteSchema,
+};
+
+module.exports = {
+  schemas,
+};
