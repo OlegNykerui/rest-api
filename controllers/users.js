@@ -2,19 +2,10 @@ const jwt = require("jsonwebtoken");
 
 const { User } = require("../models/userSchema");
 require("dotenv").config();
-const secret = process.env.SECRET;
-const userSchema = require("../models/userSchema");
-// const service = require("../models/user");
+// const secret = process.env.SECRET;
+const { SECRET } = process.env;
 
 const registration = async (req, res, next) => {
-  const validationResult = userSchema.validate(req.body);
-  if (validationResult.error) {
-    return res.json({
-      status: validationResult.error.details[0].message,
-      code: 401,
-      message: "Email or password is wrong",
-    });
-  }
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user) {
@@ -45,14 +36,6 @@ const registration = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
-  const validationResult = userSchema.validate(req.body);
-  if (validationResult.error) {
-    return res.json({
-      status: validationResult.error.details[0].message,
-      code: 401,
-      message: "Email or password is wrong",
-    });
-  }
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
@@ -70,7 +53,7 @@ const login = async (req, res, next) => {
     email: user.email,
   };
 
-  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+  const token = jwt.sign(payload, SECRET, { expiresIn: "1h" });
   await User.findByIdAndUpdate({ _id: user._id }, { $set: { token } });
   res.json({
     status: "success",
