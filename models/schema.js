@@ -23,6 +23,4 @@ const Contact = new mongoose.Schema(
   { versionKey: false }
 );
 
-// const Contact = mongoose.model("Contact", contactSchema);
-
 module.exports = mongoose.model("Contact", Contact);

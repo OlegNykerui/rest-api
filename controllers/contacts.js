@@ -1,9 +1,10 @@
-const Contact = require("./schema");
-const validation = require("./validation");
+const Contact = require("../models/schema");
+const { contactSchema, updateFavoriteSchema } = require("../models/validation");
 
 const getAll = async (req, res, next) => {
   try {
     const contacts = await Contact.find();
+    console.log(contacts);
     return res.status(200).json(contacts);
   } catch (err) {
     console.log(err);
@@ -25,7 +26,7 @@ const getById = async (req, res, next) => {
 
 const add = async (req, res, next) => {
   try {
-    const validationResult = validation.validate(req.body);
+    const validationResult = contactSchema.validate(req.body);
     if (validationResult.error) {
       return res.status(400).json({
         message: "missing required name field",
@@ -51,7 +52,7 @@ const removeById = async (req, res, next) => {
 
 const updateById = async (req, res, next) => {
   try {
-    const validationResult = validation.validate(req.body);
+    const validationResult = contactSchema.validate(req.body);
     if (validationResult.error) {
       return res.status(400).json({
         message: "missing fields",
@@ -75,7 +76,7 @@ const updateById = async (req, res, next) => {
 
 const favorite = async (req, res, next) => {
   try {
-    const validationResult = validation.validate(req.body);
+    const validationResult = updateFavoriteSchema.validate(req.body);
     if (validationResult.error) {
       return res.status(400).json({
         message: "Missing field favorite",
