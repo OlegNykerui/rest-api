@@ -1,8 +1,10 @@
 const jwt = require("jsonwebtoken");
-
+const path = require("path");
+const fs = require("fs").promises;
+const gravatar = require("gravatar");
+const Jimp = require("jimp");
 const { User } = require("../models/userSchema");
 require("dotenv").config();
-// const secret = process.env.SECRET;
 const { SECRET } = process.env;
 
 const registration = async (req, res, next) => {
@@ -16,8 +18,9 @@ const registration = async (req, res, next) => {
       data: "Conflict",
     });
   }
+  const avatarURL = gravatar.url(email);
   try {
-    const newUser = new User({ email, password });
+    const newUser = new User({ email, password, avatarURL });
     newUser.setPassword(password);
     await newUser.save();
     res.status(201).json({
@@ -27,6 +30,7 @@ const registration = async (req, res, next) => {
         user: {
           email,
           subscription: newUser.subscription,
+          avatarURL,
         },
       },
     });
@@ -63,6 +67,7 @@ const login = async (req, res, next) => {
       user: {
         email,
         subscription: user.subscription,
+        avatarURL: user.avatarURL,
       },
     },
   });
@@ -90,9 +95,33 @@ const current = async (req, res, next) => {
   });
 };
 
+const updateAvatar = async (req, res, next) => {
+  const { _id } = req.user;
+  const { originalname } = req.file;
+  const tempUpload = req.file.path;
+  const filename = `${_id}_${originalname}`;
+  const newPathFile = path.join(__dirname, "../", "public", "avatars");
+  const resultUpload = path.join(newPathFile, filename);
+  try {
+    await fs.rename(tempUpload, resultUpload);
+    const resizeFile = await Jimp.read(resultUpload);
+    await resizeFile.resize(250, 250).writeAsync(resultUpload);
+    const avatarURL = path.join("avatar", filename);
+    await User.updateOne({ _id }, { avatar: avatarURL });
+    res.json({
+      avatarURL,
+      // status: "success",
+    });
+  } catch (err) {
+    await fs.unlink(tempUpload);
+    return next(err);
+  }
+};
+
 module.exports = {
   registration,
   login,
   logout,
   current,
+  updateAvatar,
 };
