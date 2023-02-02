@@ -102,7 +102,6 @@ const updateAvatar = async (req, res, next) => {
   const filename = `${_id}_${originalname}`;
   const newPathFile = path.join(__dirname, "../", "public", "avatars");
   const resultUpload = path.join(newPathFile, filename);
-
   try {
     await fs.rename(tempUpload, resultUpload);
     const resizeFile = await Jimp.read(resultUpload);
@@ -111,6 +110,7 @@ const updateAvatar = async (req, res, next) => {
     await User.updateOne({ _id }, { avatar: avatarURL });
     res.json({
       avatarURL,
+      // status: "success",
     });
   } catch (err) {
     await fs.unlink(tempUpload);
