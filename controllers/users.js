@@ -6,6 +6,8 @@ const Jimp = require("jimp");
 const { User } = require("../models/userSchema");
 require("dotenv").config();
 const { SECRET } = process.env;
+const { v4: uuidv4 } = require("uuid");
+const sendVerificationMail = require("../models/helpers/sendVerificationMail");
 
 const registration = async (req, res, next) => {
   const { email, password } = req.body;
@@ -19,10 +21,12 @@ const registration = async (req, res, next) => {
     });
   }
   const avatarURL = gravatar.url(email);
+  const verificationToken = uuidv4();
   try {
     const newUser = new User({ email, password, avatarURL });
     newUser.setPassword(password);
     await newUser.save();
+    sendVerificationMail(email, verificationToken);
     res.status(201).json({
       status: "success",
       code: 201,
@@ -110,12 +114,45 @@ const updateAvatar = async (req, res, next) => {
     await User.updateOne({ _id }, { avatar: avatarURL });
     res.json({
       avatarURL,
-      // status: "success",
     });
   } catch (err) {
     await fs.unlink(tempUpload);
     return next(err);
   }
+};
+
+const verifyUser = async (req, res, next) => {
+  const verificationToken = req.params.verificationToken;
+  const user = await User.findOne({ verificationToken });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  await User.findByIdAndUpdate(
+    { _id: user._id },
+    { $set: { verificationToken: null, verify: true } }
+  );
+  return res.status(200).json({ message: "Verification successful" });
+};
+
+const verificationRetry = async (res, req, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Missing required field email" });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(401).json({ message: "Email or password is wrong" });
+  }
+  const { verify } = user;
+  if (verify) {
+    return res
+      .status(401)
+      .json({ message: "Verification has already been passed" });
+  }
+  sendVerificationMail(email, user.verificationToken);
+  return res.status(200).json({ message: "Verification email send" });
 };
 
 module.exports = {
@@ -124,4 +161,6 @@ module.exports = {
   logout,
   current,
   updateAvatar,
+  verifyUser,
+  verificationRetry,
 };
