@@ -8,6 +8,8 @@ const {
   logout,
   current,
   updateAvatar,
+  verifyUser,
+  verificationRetry,
 } = require("../../controllers/users");
 const auth = require("../../models/middlewares/authMiddleware");
 const ctrlWrapper = require("../../models/helpers/controllerWrapper");
@@ -19,5 +21,8 @@ router.post("/login", validationMiddlewares, ctrlWrapper(login));
 router.get("/logout", auth, ctrlWrapper(logout));
 router.get("/current", auth, ctrlWrapper(current));
 router.patch("/avatars", auth, upload.single("avatar", updateAvatar));
+//
+router.get("/verify/:verificationToken", ctrlWrapper(verifyUser));
+router.post("/verify", ctrlWrapper(verificationRetry));
 
 module.exports = router;
